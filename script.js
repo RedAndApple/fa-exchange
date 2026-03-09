@@ -1,5 +1,8 @@
-const API_BASE = "http://localhost:3000";
-const WS_URL = "ws://localhost:3000";
+const API_BASE = "";
+const WS_URL =
+  location.protocol === "https:"
+    ? "wss://" + location.host
+    : "ws://" + location.host;
 const SYMBOL = "FAUSDT";
 const DEFAULT_INTERVAL = "1m";
 const REFRESH_MS = 12000;
