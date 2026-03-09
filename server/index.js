@@ -11,9 +11,17 @@ const { WebSocketServer } = require("ws");
 const { ethers } = require("ethers");
 
 const app = express();
-const path = require("path");
+
+/* =========================
+   FRONTEND (FIX FOR RENDER)
+========================= */
 
 app.use(express.static(path.join(__dirname, "..")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
 app.set("trust proxy", 1);
 
 app.use(
