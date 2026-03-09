@@ -11,6 +11,9 @@ const { WebSocketServer } = require("ws");
 const { ethers } = require("ethers");
 
 const app = express();
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "..")));
 app.set("trust proxy", 1);
 
 app.use(
