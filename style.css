@@ -1,0 +1,455 @@
+:root {
+  --bg: #f7fbfc;
+  --panel: #ffffff;
+  --panel-soft: #f0fbfc;
+  --border: #cde7ea;
+  --text: #15313a;
+  --muted: #5f7f88;
+  --accent: #18b7c5;
+  --accent-dark: #0f8d98;
+  --accent-soft: #e6f8fa;
+  --buy: #15a05d;
+  --sell: #d84b57;
+  --shadow: 0 10px 25px rgba(14, 78, 88, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(24, 183, 197, 0.12), transparent 24%),
+    linear-gradient(180deg, #f9fdfe 0%, #f3fbfc 100%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 1.2fr 1.7fr auto;
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #10a9b7 0%, #22cad4 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 14px 35px rgba(20, 142, 153, 0.22);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.brand-text h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.brand-text p {
+  margin: 0;
+  opacity: 0.92;
+  font-size: 14px;
+}
+
+.market-header {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pair-card,
+.market-stat {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pair-label,
+.stat-label {
+  font-size: 12px;
+  opacity: 0.88;
+  margin-bottom: 4px;
+}
+
+.pair-value,
+.market-stat strong {
+  font-size: 16px;
+}
+
+.bid-stat strong {
+  color: #d8ffe9;
+}
+
+.ask-stat strong {
+  color: #ffe3e5;
+}
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.auth-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfeff 100%);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-card {
+  display: grid;
+  gap: 10px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.form-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--accent-dark);
+}
+
+input,
+select,
+button {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+input,
+select {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(24, 183, 197, 0.12);
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, #35d4dd 100%);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.secondary-btn,
+.ghost-btn,
+.interval-btn {
+  background: #ffffff;
+  color: var(--accent-dark);
+  border: 1px solid var(--border);
+}
+
+.ghost-btn {
+  width: auto;
+  padding: 9px 14px;
+}
+
+.connect-btn {
+  max-width: 240px;
+  margin-bottom: 12px;
+}
+
+.summary-panel {
+  display: none;
+}
+
+.trading-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.9fr);
+  grid-template-areas:
+    "chart orderbook"
+    "chart trades"
+    "orderform trades";
+  gap: 14px;
+}
+
+.chart-panel {
+  grid-area: chart;
+}
+
+.orderbook-panel {
+  grid-area: orderbook;
+}
+
+.trades-panel {
+  grid-area: trades;
+}
+
+.order-entry-panel {
+  grid-area: orderform;
+}
+
+#chart-container {
+  height: 420px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.intervals {
+  display: flex;
+  gap: 8px;
+}
+
+.interval-btn {
+  width: auto;
+  padding: 8px 12px;
+}
+
+.interval-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.book-side {
+  background: #fbfeff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.bid-title {
+  color: var(--buy);
+}
+
+.ask-title {
+  color: var(--sell);
+}
+
+.order-form {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.meta-grid {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  color: var(--muted);
+  word-break: break-word;
+  background: #fbfeff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.onchain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.inline-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e6f0f2;
+  padding: 8px 6px;
+  text-align: right;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  background: #fbfeff;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+tbody tr:hover {
+  background: #f8fcfd;
+}
+
+tbody .bid td:first-child {
+  color: var(--buy);
+  font-weight: 700;
+}
+
+tbody .ask td:first-child {
+  color: var(--sell);
+  font-weight: 700;
+}
+
+.status {
+  min-height: 20px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.status.error {
+  color: var(--sell);
+}
+
+.status.success {
+  color: var(--buy);
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center !important;
+}
+
+@media (max-width: 1180px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .market-header {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .trading-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "chart"
+      "orderbook"
+      "trades"
+      "orderform";
+  }
+
+  .info-grid,
+  .auth-grid,
+  .onchain-grid,
+  .book-grid,
+  .order-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 12px;
+  }
+
+  .brand-text h1 {
+    font-size: 22px;
+  }
+
+  .market-header {
+    grid-template-columns: 1fr 1fr;
+  }
+}

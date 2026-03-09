@@ -1,0 +1,374 @@
+{
+  "users": [
+    {
+      "id": "sys_buy",
+      "email": "maker.buy@system.local",
+      "passwordHash": "system",
+      "createdAt": 1772981902389
+    },
+    {
+      "id": "sys_sell",
+      "email": "maker.sell@system.local",
+      "passwordHash": "system",
+      "createdAt": 1772981902413
+    },
+    {
+      "id": "u1",
+      "email": "237958@edu.fa.ru",
+      "passwordHash": "847afc424ddb9bb377bc4c3ab9e92924:145d9189922e7ac47664ef828bc3c1e50a5a77ef5480054a6aba4e3a2b7197eb",
+      "createdAt": 1772982177599
+    }
+  ],
+  "sessions": [
+    {
+      "token": "3fd3f018aaf25eba6ca96db3ce7cab716e9dd6cbe13e8b95",
+      "userId": "u1",
+      "createdAt": 1772983322285
+    }
+  ],
+  "wallets": [
+    {
+      "walletId": "w_1772981902412_52365",
+      "userId": "sys_buy",
+      "address": "0x6C85b3FCA5002d3d2C1878DFb2D8683838fCbF38",
+      "privateKey": "0xba90a4e7131977a29a9901b7efcd24075a6b50dfbe429dbc552f461e6fa9c5a8",
+      "createdAt": 1772981902412
+    },
+    {
+      "walletId": "w_1772981902421_4749",
+      "userId": "sys_sell",
+      "address": "0x4e64e5b5eE351E6BBd93744124aceE918e0cc2d1",
+      "privateKey": "0x6cc61735c1fb4f4dda496aa944efe5681a12cdc627d2ef0b7a9c2669e202a279",
+      "createdAt": 1772981902421
+    },
+    {
+      "walletId": "w_1772982177622_42307",
+      "userId": "u1",
+      "address": "0xDf2927D004aA17531d3Bf7ED8Cfa31042A43ffCD",
+      "privateKey": "0x0340afbcb19ad7472bc3177532dbcf28749f27b9f764de08acde3eeb5f921996",
+      "createdAt": 1772982177622
+    }
+  ],
+  "balances": {
+    "sys_buy": {
+      "FA_available": 0,
+      "FA_locked": 0,
+      "USDT_available": 494252,
+      "USDT_locked": 5748
+    },
+    "sys_sell": {
+      "FA_available": 493900,
+      "FA_locked": 6100,
+      "USDT_available": 0,
+      "USDT_locked": 0
+    },
+    "u1": {
+      "FA_available": 10,
+      "FA_locked": 0,
+      "USDT_available": 10000,
+      "USDT_locked": 0
+    }
+  },
+  "orders": [
+    {
+      "id": "ord_1",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.99,
+      "quantity": 520,
+      "remaining": 520,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902423,
+      "lockedQuoteRemaining": 514.8
+    },
+    {
+      "id": "ord_2",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.01,
+      "quantity": 520,
+      "remaining": 520,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902425,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_3",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.98,
+      "quantity": 540,
+      "remaining": 540,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902427,
+      "lockedQuoteRemaining": 529.2
+    },
+    {
+      "id": "ord_4",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.02,
+      "quantity": 540,
+      "remaining": 540,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902429,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_5",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.97,
+      "quantity": 560,
+      "remaining": 560,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902431,
+      "lockedQuoteRemaining": 543.2
+    },
+    {
+      "id": "ord_6",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.03,
+      "quantity": 560,
+      "remaining": 560,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902432,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_7",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.96,
+      "quantity": 580,
+      "remaining": 580,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902434,
+      "lockedQuoteRemaining": 556.8
+    },
+    {
+      "id": "ord_8",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.04,
+      "quantity": 580,
+      "remaining": 580,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902435,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_9",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.95,
+      "quantity": 600,
+      "remaining": 600,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902437,
+      "lockedQuoteRemaining": 570
+    },
+    {
+      "id": "ord_10",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.05,
+      "quantity": 600,
+      "remaining": 600,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902439,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_11",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.94,
+      "quantity": 620,
+      "remaining": 620,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902440,
+      "lockedQuoteRemaining": 582.8
+    },
+    {
+      "id": "ord_12",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.06,
+      "quantity": 620,
+      "remaining": 620,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902442,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_13",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.93,
+      "quantity": 640,
+      "remaining": 640,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902443,
+      "lockedQuoteRemaining": 595.2
+    },
+    {
+      "id": "ord_14",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.07,
+      "quantity": 640,
+      "remaining": 640,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902445,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_15",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.92,
+      "quantity": 660,
+      "remaining": 660,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902446,
+      "lockedQuoteRemaining": 607.2
+    },
+    {
+      "id": "ord_16",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.08,
+      "quantity": 660,
+      "remaining": 660,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902448,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_17",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.91,
+      "quantity": 680,
+      "remaining": 680,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902449,
+      "lockedQuoteRemaining": 618.8
+    },
+    {
+      "id": "ord_18",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.09,
+      "quantity": 680,
+      "remaining": 680,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902451,
+      "lockedQuoteRemaining": 0
+    },
+    {
+      "id": "ord_19",
+      "userId": "sys_buy",
+      "symbol": "FAUSDT",
+      "side": "buy",
+      "type": "limit",
+      "price": 0.9,
+      "quantity": 700,
+      "remaining": 700,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902452,
+      "lockedQuoteRemaining": 630
+    },
+    {
+      "id": "ord_20",
+      "userId": "sys_sell",
+      "symbol": "FAUSDT",
+      "side": "sell",
+      "type": "limit",
+      "price": 1.1,
+      "quantity": 700,
+      "remaining": 700,
+      "filled": 0,
+      "status": "open",
+      "createdAt": 1772981902454,
+      "lockedQuoteRemaining": 0
+    }
+  ],
+  "trades": [],
+  "deposits": [],
+  "withdrawals": [],
+  "candles": {
+    "1m": [],
+    "5m": [],
+    "1h": []
+  },
+  "marketState": {
+    "symbol": "FAUSDT",
+    "lastPrice": 1,
+    "bestBid": 0.99,
+    "bestAsk": 1.01,
+    "lastOrderId": 20,
+    "lastTradeId": 0,
+    "lastUserId": 1,
+    "lastDepositId": 0,
+    "lastWithdrawalId": 0,
+    "lastScannedBlock": 0
+  }
+}

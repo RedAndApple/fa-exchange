@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FA Exchange | Financial University</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark">FA</div>
+        <div class="brand-text">
+          <h1>FA Exchange</h1>
+          <p>Demo CEX in the style of Financial University</p>
+        </div>
+      </div>
+
+      <div class="market-header">
+        <div class="pair-card">
+          <span class="pair-label">Pair</span>
+          <strong class="pair-value">FA / USDT</strong>
+        </div>
+
+        <div class="market-stat">
+          <span class="stat-label">Last</span>
+          <strong id="last-price">-</strong>
+        </div>
+
+        <div class="market-stat bid-stat">
+          <span class="stat-label">Bid</span>
+          <strong id="best-bid">-</strong>
+        </div>
+
+        <div class="market-stat ask-stat">
+          <span class="stat-label">Ask</span>
+          <strong id="best-ask">-</strong>
+        </div>
+
+        <div class="market-stat">
+          <span class="stat-label">Spread</span>
+          <strong id="spread">-</strong>
+        </div>
+      </div>
+
+      <div class="auth-row">
+        <span id="current-user">Not logged in</span>
+        <button id="logout-btn" class="hidden ghost-btn" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section class="panel auth-panel">
+      <div class="section-head">
+        <h2>Authentication</h2>
+        <span class="section-note">User cabinet access</span>
+      </div>
+
+      <div class="auth-grid">
+        <form id="register-form" class="form-card">
+          <h3>Create account</h3>
+          <input id="register-email" type="email" placeholder="Email" required />
+          <input id="register-password" type="password" placeholder="Password (min 6)" required />
+          <button type="submit" class="primary-btn">Create account</button>
+        </form>
+
+        <form id="login-form" class="form-card">
+          <h3>Login</h3>
+          <input id="login-email" type="email" placeholder="Email" required />
+          <input id="login-password" type="password" placeholder="Password" required />
+          <button type="submit" class="primary-btn">Login</button>
+        </form>
+      </div>
+
+      <p id="auth-status" class="status"></p>
+    </section>
+
+    <section class="trading-grid">
+      <section class="panel chart-panel">
+        <div class="section-head">
+          <h2>Market chart</h2>
+          <div class="intervals">
+            <button class="interval-btn active" data-interval="1m" type="button">1m</button>
+            <button class="interval-btn" data-interval="5m" type="button">5m</button>
+            <button class="interval-btn" data-interval="1h" type="button">1h</button>
+          </div>
+        </div>
+        <div id="chart-container"></div>
+      </section>
+
+      <section class="panel orderbook-panel">
+        <div class="section-head">
+          <h2>Order book</h2>
+          <span class="section-note">Live market depth</span>
+        </div>
+
+        <div class="book-grid">
+          <div class="book-side">
+            <h3 class="bid-title">Bids</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Qty</th>
+                </tr>
+              </thead>
+              <tbody id="bids-body"></tbody>
+            </table>
+          </div>
+
+          <div class="book-side">
+            <h3 class="ask-title">Asks</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Price</th>
+                  <th>Qty</th>
+                </tr>
+              </thead>
+              <tbody id="asks-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel trades-panel">
+        <div class="section-head">
+          <h2>Recent trades</h2>
+          <span class="section-note">Market executions</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Price</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="trades-body"></tbody>
+        </table>
+      </section>
+
+      <section class="panel order-entry-panel">
+        <div class="section-head">
+          <h2>Order entry</h2>
+          <span class="section-note">Spot trading</span>
+        </div>
+
+        <form id="order-form" class="order-form">
+          <select id="order-side">
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+          </select>
+
+          <select id="order-type">
+            <option value="limit">Limit</option>
+            <option value="market">Market</option>
+          </select>
+
+          <input id="order-price" type="number" min="0.0001" step="0.0001" placeholder="Price" />
+          <input id="order-qty" type="number" min="0.0001" step="0.0001" placeholder="Quantity" required />
+
+          <button type="submit" class="primary-btn">Submit order</button>
+        </form>
+
+        <p id="order-status" class="status"></p>
+      </section>
+    </section>
+
+    <section class="info-grid">
+      <article class="panel">
+        <div class="section-head">
+          <h2>Balances</h2>
+          <span class="section-note">Available and locked</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Available</th>
+              <th>Locked</th>
+            </tr>
+          </thead>
+          <tbody id="balances-body"></tbody>
+        </table>
+      </article>
+
+      <article class="panel">
+        <div class="section-head">
+          <h2>Open orders</h2>
+          <span class="section-note">Active orders</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Side</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Rem</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="open-orders-body"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <h2>Order history</h2>
+        <span class="section-note">Completed and cancelled</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Side</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="order-history-body"></tbody>
+      </table>
+    </section>
+
+    <section class="panel onchain-panel">
+      <div class="section-head">
+        <h2>Deposit / Withdraw</h2>
+        <span class="section-note">MetaMask + ExchangeVault</span>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item"><strong>Token:</strong> <span id="token-address">-</span></div>
+        <div class="meta-item"><strong>Vault:</strong> <span id="vault-address">-</span></div>
+        <div class="meta-item"><strong>MetaMask:</strong> <span id="connected-address">Not connected</span></div>
+        <div class="meta-item"><strong>Your deposit address:</strong> <span id="user-deposit-address">Login required</span></div>
+      </div>
+
+      <button id="connect-btn" type="button" class="primary-btn connect-btn">Connect MetaMask</button>
+
+      <div class="onchain-grid">
+        <form id="deposit-form" class="form-card">
+          <h3>Approve + Deposit to Vault</h3>
+          <input id="deposit-amount" type="number" min="0.000000000000000001" step="0.0001" placeholder="Amount FA" required />
+          <div class="inline-actions">
+            <button id="approve-btn" type="button" class="secondary-btn">Approve</button>
+            <button id="deposit-btn" type="submit" class="primary-btn">Deposit</button>
+          </div>
+        </form>
+
+        <form id="withdraw-form" class="form-card">
+          <h3>Withdraw request</h3>
+          <input id="withdraw-to" type="text" placeholder="Destination address" required />
+          <input id="withdraw-amount" type="number" min="0.000000000000000001" step="0.0001" placeholder="Amount FA" required />
+          <button type="submit" class="primary-btn">Request withdraw</button>
+        </form>
+      </div>
+
+      <p id="onchain-status" class="status"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
