@@ -16,7 +16,13 @@ const app = express();
    FRONTEND (FIX FOR RENDER)
 ========================= */
 
-app.use(express.static(path.join(__dirname, "..")));
+const FRONTEND_PATH = path.resolve(__dirname, "../");
+
+app.use(express.static(FRONTEND_PATH));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "index.html"));
+});
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "index.html"));
