@@ -1,12 +1,32 @@
 const API_BASE = "";
-const WS_URL =
-  location.protocol === "https:"
-    ? "wss://" + location.host
-    : "ws://" + location.host;
+const WS_URL = (() => {
+  try {
+    const apiUrl = new URL(API_BASE);
+    return apiUrl.protocol === "https:"
+      ? `wss://${apiUrl.host}`
+      : `ws://${apiUrl.host}`;
+  } catch (_) {
+    return location.protocol === "https:"
+      ? "wss://" + location.host
+      : "ws://" + location.host;
+  }
+})();
+
 const SYMBOL = "FAUSDT";
 const DEFAULT_INTERVAL = "1m";
 const REFRESH_MS = 12000;
-const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7";
+
+/* =========================
+   🔥 NATIVE CHAIN CONFIG
+========================= */
+
+const FINCHAIN_CHAIN_ID_DEC = 525;
+const FINCHAIN_CHAIN_ID_HEX = "0x20d";
+const FINCHAIN_RPC_URL = "https://rpc.finchainlab.ru";
+const FINCHAIN_CHAIN_NAME = "FinChain";
+const FINCHAIN_CURRENCY_SYMBOL = "FA";
+const FINCHAIN_CURRENCY_NAME = "FA";
+const FINCHAIN_BLOCK_EXPLORER = "https://explorer.finchainlab.ru";
 
 let currentInterval = DEFAULT_INTERVAL;
 let chart;
@@ -93,12 +113,13 @@ function fmtTime(ts) {
 
 async function api(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
+    method: options.method || "GET",
     credentials: "include",
-    ...options,
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {})
-    }
+    },
+    body: options.body
   });
 
   const payload = await response.json().catch(() => ({}));
@@ -172,6 +193,7 @@ async function register(event) {
 
     setStatus(els.authStatus, "Registration successful.", "success");
     await refreshMe();
+    await loadDepositAddress();
     await refreshTradingData();
   } catch (e) {
     setStatus(els.authStatus, `Register failed: ${e.message}`, "error");
@@ -191,6 +213,7 @@ async function login(event) {
 
     setStatus(els.authStatus, "Login successful.", "success");
     await refreshMe();
+    await loadDepositAddress();
     await refreshTradingData();
   } catch (e) {
     setStatus(els.authStatus, `Login failed: ${e.message}`, "error");
@@ -242,8 +265,8 @@ async function loadConfig() {
   const cfg = await api("/api/config");
   state.config = cfg;
 
-  setText(els.tokenAddress, cfg.tokenAddress || "-");
-  setText(els.vaultAddress, cfg.vaultAddress || "-");
+  setText(els.tokenAddress, `Native ${FINCHAIN_CURRENCY_SYMBOL}`);
+  setText(els.vaultAddress, "No vault (native deposits)");
 }
 
 async function loadDepositAddress() {
@@ -254,14 +277,63 @@ async function loadDepositAddress() {
 
   try {
     const payload = await api("/api/wallet/me");
-    setText(els.userDepositAddress, payload.address || "-");
-  } catch {
+
+    if (payload && payload.address) {
+      setText(els.userDepositAddress, payload.address);
+      return;
+    }
+
+    if (state.me && state.me.depositAddress) {
+      setText(els.userDepositAddress, state.me.depositAddress);
+      return;
+    }
+
     setText(els.userDepositAddress, "Unavailable");
+  } catch {
+    if (state.me && state.me.depositAddress) {
+      setText(els.userDepositAddress, state.me.depositAddress);
+    } else {
+      setText(els.userDepositAddress, "Unavailable");
+    }
   }
 }
 
 function renderWalletAddress(address) {
   setText(els.connectedAddress, address || "Not connected");
+}
+
+async function ensureFinChain() {
+  if (!window.ethereum) {
+    throw new Error("MetaMask not found.");
+  }
+
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: FINCHAIN_CHAIN_ID_HEX }]
+    });
+  } catch (switchError) {
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: FINCHAIN_CHAIN_ID_HEX,
+            chainName: FINCHAIN_CHAIN_NAME,
+            nativeCurrency: {
+              name: FINCHAIN_CURRENCY_NAME,
+              symbol: FINCHAIN_CURRENCY_SYMBOL,
+              decimals: 18
+            },
+            rpcUrls: [FINCHAIN_RPC_URL],
+            blockExplorerUrls: [FINCHAIN_BLOCK_EXPLORER]
+          }
+        ]
+      });
+    } else {
+      throw switchError;
+    }
+  }
 }
 
 async function connectMetaMask() {
@@ -270,10 +342,7 @@ async function connectMetaMask() {
       throw new Error("MetaMask not found.");
     }
 
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
-    });
+    await ensureFinChain();
 
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
@@ -290,7 +359,11 @@ async function connectMetaMask() {
       els.withdrawTo.value = address;
     }
 
-    setStatus(els.onchainStatus, "MetaMask connected.", "success");
+    setStatus(
+      els.onchainStatus,
+      `MetaMask connected to ${FINCHAIN_CHAIN_NAME}.`,
+      "success"
+    );
   } catch (e) {
     setStatus(els.onchainStatus, `Connect failed: ${e.message}`, "error");
   }
@@ -643,20 +716,14 @@ function parseDepositAmountWei() {
 
 async function approveDeposit() {
   try {
-    const signer = requireSigner();
-    const amountWei = parseDepositAmountWei();
+    requireSigner();
+    parseDepositAmountWei();
 
-    const token = new ethers.Contract(
-      state.config.tokenAddress,
-      ["function approve(address spender,uint256 amount) external returns (bool)"],
-      signer
+    setStatus(
+      els.onchainStatus,
+      `Approve is not required for native ${FINCHAIN_CURRENCY_SYMBOL}. Just send funds to your deposit address.`,
+      "success"
     );
-
-    setStatus(els.onchainStatus, "Sending approve...", "success");
-    const tx = await token.approve(state.config.vaultAddress, amountWei);
-    await tx.wait();
-
-    setStatus(els.onchainStatus, `Approve confirmed: ${tx.hash}`, "success");
   } catch (e) {
     setStatus(els.onchainStatus, `Approve failed: ${e.message}`, "error");
   }
@@ -666,23 +733,29 @@ async function depositToVault(event) {
   event.preventDefault();
 
   try {
-    const signer = requireSigner();
-    const me = requireLoggedInUser();
-    const amountWei = parseDepositAmountWei();
+    requireLoggedInUser();
+    parseDepositAmountWei();
 
-    const vault = new ethers.Contract(
-      state.config.vaultAddress,
-      ["function deposit(bytes32 userId,uint256 amount) external"],
-      signer
+    const depositAddress = String(els.userDepositAddress.textContent || "").trim();
+
+    if (!depositAddress || depositAddress === "Login required" || depositAddress === "Unavailable") {
+      throw new Error("Deposit address is unavailable.");
+    }
+
+    if (navigator.clipboard && depositAddress && depositAddress !== "-") {
+      try {
+        await navigator.clipboard.writeText(depositAddress);
+      } catch (_) {
+        // ignore clipboard failures
+      }
+    }
+
+    setStatus(
+      els.onchainStatus,
+      `Send ${FINCHAIN_CURRENCY_SYMBOL} from MetaMask to your deposit address: ${depositAddress}. The address has been copied if clipboard access is available. Funds will be credited automatically after the transaction is detected.`,
+      "success"
     );
 
-    const userHash = ethers.keccak256(ethers.toUtf8Bytes(String(me.id)));
-
-    setStatus(els.onchainStatus, "Sending deposit...", "success");
-    const tx = await vault.deposit(userHash, amountWei);
-    await tx.wait();
-
-    setStatus(els.onchainStatus, `Deposit confirmed: ${tx.hash}`, "success");
     setTimeout(async () => {
       await loadBalances();
       await loadOrderHistory();
@@ -696,7 +769,7 @@ async function requestWithdraw(event) {
   event.preventDefault();
 
   try {
-    const me = requireLoggedInUser();
+    requireLoggedInUser();
     const to = String(els.withdrawTo.value || "").trim();
     const amountHuman = String(els.withdrawAmount.value || "").trim();
 
@@ -708,7 +781,6 @@ async function requestWithdraw(event) {
     const payload = await api("/api/withdraw", {
       method: "POST",
       body: JSON.stringify({
-        userId: me.id,
         to,
         amountHuman
       })
@@ -780,3 +852,14 @@ async function init() {
 }
 
 init();
+
+const orderbookPanel = document.getElementById("orderbook-panel");
+const toggleOrderbookBtn = document.getElementById("toggle-orderbook");
+
+if (orderbookPanel && toggleOrderbookBtn) {
+  toggleOrderbookBtn.addEventListener("click", () => {
+    const expanded = orderbookPanel.classList.toggle("expanded");
+    document.body.classList.toggle("orderbook-expanded", expanded);
+    toggleOrderbookBtn.textContent = expanded ? "Collapse" : "Expand";
+  });
+}

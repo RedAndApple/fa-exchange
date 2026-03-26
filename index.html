@@ -9,46 +9,54 @@
 </head>
 <body>
   <main class="app">
-    <header class="topbar">
-      <div class="brand-block">
-        <div class="brand-mark">FA</div>
-        <div class="brand-text">
+
+    <header class="top-shell">
+      <section class="hero-bar">
+        <div class="hero-logo-box">
+  <img
+    src="./assets/fa-logo-en.png"
+    alt="Financial University logo"
+    class="hero-logo-img"
+  />
+</div>
+
+        <div class="hero-copy">
           <h1>FA Exchange</h1>
-          <p>Demo CEX in the style of Financial University</p>
+          <p>Digital asset exchange interface in Financial University identity</p>
         </div>
-      </div>
+      </section>
 
-      <div class="market-header">
-        <div class="pair-card">
-          <span class="pair-label">Pair</span>
-          <strong class="pair-value">FA / USDT</strong>
-        </div>
-
-        <div class="market-stat">
-          <span class="stat-label">Last</span>
-          <strong id="last-price">-</strong>
+      <section class="market-strip">
+        <div class="market-card market-card-pair">
+          <span class="market-label">Pair</span>
+          <strong class="market-value">FA / USDT</strong>
         </div>
 
-        <div class="market-stat bid-stat">
-          <span class="stat-label">Bid</span>
-          <strong id="best-bid">-</strong>
+        <div class="market-card">
+          <span class="market-label">Last</span>
+          <strong class="market-value" id="last-price">-</strong>
         </div>
 
-        <div class="market-stat ask-stat">
-          <span class="stat-label">Ask</span>
-          <strong id="best-ask">-</strong>
+        <div class="market-card market-card-bid">
+          <span class="market-label">Bid</span>
+          <strong class="market-value" id="best-bid">-</strong>
         </div>
 
-        <div class="market-stat">
-          <span class="stat-label">Spread</span>
-          <strong id="spread">-</strong>
+        <div class="market-card market-card-ask">
+          <span class="market-label">Ask</span>
+          <strong class="market-value" id="best-ask">-</strong>
         </div>
-      </div>
 
-      <div class="auth-row">
+        <div class="market-card">
+          <span class="market-label">Spread</span>
+          <strong class="market-value" id="spread">-</strong>
+        </div>
+      </section>
+
+      <section class="user-strip">
         <span id="current-user">Not logged in</span>
         <button id="logout-btn" class="hidden ghost-btn" type="button">Logout</button>
-      </div>
+      </section>
     </header>
 
     <section class="panel auth-panel">
@@ -89,63 +97,10 @@
         <div id="chart-container"></div>
       </section>
 
-      <section class="panel orderbook-panel">
-        <div class="section-head">
-          <h2>Order book</h2>
-          <span class="section-note">Live market depth</span>
-        </div>
-
-        <div class="book-grid">
-          <div class="book-side">
-            <h3 class="bid-title">Bids</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Price</th>
-                  <th>Qty</th>
-                </tr>
-              </thead>
-              <tbody id="bids-body"></tbody>
-            </table>
-          </div>
-
-          <div class="book-side">
-            <h3 class="ask-title">Asks</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Price</th>
-                  <th>Qty</th>
-                </tr>
-              </thead>
-              <tbody id="asks-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel trades-panel">
-        <div class="section-head">
-          <h2>Recent trades</h2>
-          <span class="section-note">Market executions</span>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Price</th>
-              <th>Qty</th>
-            </tr>
-          </thead>
-          <tbody id="trades-body"></tbody>
-        </table>
-      </section>
-
       <section class="panel order-entry-panel">
         <div class="section-head">
           <h2>Order entry</h2>
-          <span class="section-note">Spot trading</span>
+          <span class="section-note">Spot order placement</span>
         </div>
 
         <form id="order-form" class="order-form">
@@ -166,6 +121,66 @@
         </form>
 
         <p id="order-status" class="status"></p>
+      </section>
+
+      <section class="panel orderbook-panel" id="orderbook-panel">
+        <div class="section-head">
+          <div>
+            <h2>Order book</h2>
+            <span class="section-note">Market depth and liquidity snapshot</span>
+          </div>
+          <button id="toggle-orderbook" class="ghost-btn toggle-book-btn" type="button">
+            Expand
+          </button>
+        </div>
+
+        <div class="orderbook-scroll">
+          <div class="book-grid">
+            <div class="book-side">
+              <h3 class="bid-title">Bids</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Price</th>
+                    <th>Qty</th>
+                  </tr>
+                </thead>
+                <tbody id="bids-body"></tbody>
+              </table>
+            </div>
+
+            <div class="book-side">
+              <h3 class="ask-title">Asks</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Price</th>
+                    <th>Qty</th>
+                  </tr>
+                </thead>
+                <tbody id="asks-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel trades-panel">
+        <div class="section-head">
+          <h2>Recent trades</h2>
+          <span class="section-note">Recent executed trades</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Price</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="trades-body"></tbody>
+        </table>
       </section>
     </section>
 
@@ -234,25 +249,37 @@
     <section class="panel onchain-panel">
       <div class="section-head">
         <h2>Deposit / Withdraw</h2>
-        <span class="section-note">MetaMask + ExchangeVault</span>
+        <span class="section-note">Native FA deposits and withdrawals</span>
       </div>
 
-      <div class="meta-grid">
-        <div class="meta-item"><strong>Token:</strong> <span id="token-address">-</span></div>
-        <div class="meta-item"><strong>Vault:</strong> <span id="vault-address">-</span></div>
-        <div class="meta-item"><strong>MetaMask:</strong> <span id="connected-address">Not connected</span></div>
-        <div class="meta-item"><strong>Your deposit address:</strong> <span id="user-deposit-address">Login required</span></div>
+      <div class="wallet-info-strip">
+        <div class="wallet-info-card">
+          <span class="wallet-info-label">Token</span>
+          <strong class="wallet-info-value" id="token-address">Native FA</strong>
+        </div>
+
+       
+
+        <div class="wallet-info-card">
+          <span class="wallet-info-label">MetaMask</span>
+          <strong class="wallet-info-value" id="connected-address">Not connected</strong>
+        </div>
+
+        <div class="wallet-info-card wallet-info-card-wide">
+          <span class="wallet-info-label">Your deposit address</span>
+          <strong class="wallet-info-value" id="user-deposit-address">Login required</strong>
+        </div>
       </div>
 
       <button id="connect-btn" type="button" class="primary-btn connect-btn">Connect MetaMask</button>
 
       <div class="onchain-grid">
         <form id="deposit-form" class="form-card">
-          <h3>Approve + Deposit to Vault</h3>
+          <h3>Deposit native FA</h3>
           <input id="deposit-amount" type="number" min="0.000000000000000001" step="0.0001" placeholder="Amount FA" required />
           <div class="inline-actions">
-            <button id="approve-btn" type="button" class="secondary-btn">Approve</button>
-            <button id="deposit-btn" type="submit" class="primary-btn">Deposit</button>
+            <button id="approve-btn" type="button" class="secondary-btn">Show deposit instructions</button>
+            <button id="deposit-btn" type="submit" class="primary-btn">Copy deposit address</button>
           </div>
         </form>
 
@@ -266,6 +293,7 @@
 
       <p id="onchain-status" class="status"></p>
     </section>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>

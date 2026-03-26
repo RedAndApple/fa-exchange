@@ -45,10 +45,12 @@ app.use(
     secret: "dev-secret-key",
     resave: false,
     saveUninitialized: false,
+    proxy: false,
     cookie: {
       httpOnly: true,
       secure: false,
-      sameSite: "lax"
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
@@ -84,35 +86,21 @@ const MIN_GAS_ETH = process.env.MIN_GAS_ETH || "0.0002";
    ETHERS
 ========================= */
 
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-
+const provider = new ethers.JsonRpcProvider(
+  process.env.RPC_URL,
+  undefined,
+  {
+    staticNetwork: false
+  }
+);
+const withdrawProvider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 let privateKey = process.env.PRIVATE_KEY;
 if (!privateKey.startsWith("0x")) {
   privateKey = "0x" + privateKey;
 }
 
-const hotWallet = new ethers.Wallet(privateKey, provider);
-
-const tokenAddress = ethers.getAddress(process.env.TOKEN_ADDRESS);
-const vaultAddress = ethers.getAddress(process.env.VAULT_ADDRESS);
-
-/* =========================
-   CONTRACTS
-========================= */
-
-const vaultAbi = [
-  "event Deposited(bytes32 indexed userId, address indexed from, uint256 amount)",
-  "function withdraw(address to, uint256 amount) external"
-];
-
-const erc20Abi = [
-  "event Transfer(address indexed from, address indexed to, uint256 value)",
-  "function balanceOf(address owner) view returns (uint256)",
-  "function transfer(address to, uint256 amount) returns (bool)"
-];
-
-const vault = new ethers.Contract(vaultAddress, vaultAbi, hotWallet);
-const tokenRead = new ethers.Contract(tokenAddress, erc20Abi, provider);
+const hotWalletBase = new ethers.Wallet(privateKey, withdrawProvider);
+const hotWallet = new ethers.NonceManager(hotWalletBase);
 
 /* =========================
    MASTER HD WALLET
@@ -213,6 +201,26 @@ function broadcastMarket() {
 function broadcastUserBalance(userId) {
   const bal = ensureUserLedger(userId);
 
+async function waitForConfirmedTx(txHash, timeoutMs = 120000, pollMs = 5000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    try {
+      const receipt = await withdrawProvider.getTransactionReceipt(txHash);
+
+      if (receipt) {
+        return receipt;
+      }
+    } catch (e) {
+      console.error("receipt poll error:", e.message);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollMs));
+  }
+
+  return null;
+}
+
   broadcast("balance_update", {
     userId,
     balances: [
@@ -241,6 +249,28 @@ function ensureUserLedger(userId) {
   }
   return ledger[userId];
 }
+
+
+async function waitForConfirmedTx(txHash, timeoutMs = 120000, pollMs = 5000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    try {
+      const receipt = await provider.getTransactionReceipt(txHash);
+
+      if (receipt) {
+        return receipt;
+      }
+    } catch (e) {
+      console.error("receipt poll error:", e.message);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollMs));
+  }
+
+  return null;
+}
+
 
 function publicUser(user) {
   return {
@@ -642,25 +672,6 @@ function cancelOrderById(orderId, userId) {
 }
 
 /* =========================
-   DEPOSIT WATCHER
-========================= */
-
-const depositWatcher = createDepositWatcher({
-  provider,
-  hotWallet,
-  tokenAddress,
-  vaultAddress,
-  usersById,
-  depositAddressToUserId,
-  ledger,
-  creditedTransfers,
-  sweptTransfers,
-  GAS_TOPUP_ETH,
-  MIN_GAS_ETH,
-  masterNode
-});
-
-/* =========================
    AUTH
 ========================= */
 
@@ -707,13 +718,20 @@ app.post("/api/logout", (req, res) => {
 });
 
 app.get("/api/me", (req, res) => {
-  const userId = req.session.userId;
-  const user = userId ? usersById[userId] : null;
+  const sessionUserId = req.session?.userId || null;
+  const user = sessionUserId ? usersById[sessionUserId] : null;
 
   res.json({
-    user: user ? publicUser(user) : null
+    user: user
+      ? {
+          id: user.id,
+          email: user.email,
+          depositAddress: user.depositAddress
+        }
+      : null
   });
 });
+
 
 /* =========================
    CONFIG / WALLET / BALANCES
@@ -723,21 +741,22 @@ app.get("/api/config", async (_req, res) => {
   const net = await provider.getNetwork();
 
   res.json({
-    chainId: Number(net.chainId),
-    tokenAddress,
-    vaultAddress
+    chainId: Number(net.chainId)
   });
 });
 
 app.get("/api/wallet/me", (req, res) => {
-  const userId = req.session.userId;
-  const user = userId ? usersById[userId] : null;
+  const sessionUserId = req.session?.userId || null;
+  const user = sessionUserId ? usersById[sessionUserId] : null;
 
   if (!user) {
-    return res.status(401).json({ error: "login required" });
+    return res.json({
+      address: null,
+      error: "login required"
+    });
   }
 
-  res.json({
+  return res.json({
     address: user.depositAddress
   });
 });
@@ -914,45 +933,139 @@ app.post("/api/withdraw", async (req, res) => {
       return res.status(400).json({ error: "insufficient balance" });
     }
 
-    const amount = ethers.parseUnits(String(amountHuman), 18);
+    const hotWalletAddress = await hotWallet.getAddress();
+    const hotWalletBalance = await withdrawProvider.getBalance(hotWalletAddress);
 
-    const tx = await vault.withdraw(to, amount);
-    await tx.wait();
+    console.log("Hot wallet:", hotWalletAddress);
+    console.log("Hot wallet native balance:", ethers.formatEther(hotWalletBalance));
+
+    const value = ethers.parseEther(String(amountHuman));
+
+    if (hotWalletBalance < value) {
+      return res.status(400).json({ error: "hot wallet has insufficient native balance" });
+    }
+
+    const nonce = await provider.getTransactionCount(hotWalletAddress, "pending");
+    console.log("Using pending nonce:", nonce);
+
+    let tx;
+    try {
+      tx = await hotWallet.sendTransaction({
+        to,
+        value,
+        nonce
+      });
+    } catch (e) {
+      console.error("withdraw sendTransaction failed:", e);
+
+      const msg = String(e?.message || "");
+      const rawTx = e?.payload?.params?.[0];
+
+      if (msg.includes("Known transaction") && rawTx) {
+        const knownHash = ethers.keccak256(rawTx);
+        console.log("Known transaction reused:", knownHash);
+
+        const receipt = await waitForConfirmedTx(knownHash, 60000, 3000);
+
+        if (!receipt) {
+          return res.status(500).json({
+            error: "transaction known by RPC but not confirmed in time",
+            txHash: knownHash
+          });
+        }
+
+        if (receipt.status !== 1) {
+          return res.status(500).json({
+            error: "transaction failed on-chain",
+            txHash: knownHash
+          });
+        }
+
+        bal.FA_available = round8(bal.FA_available - amountNum);
+        broadcastUserBalance(user.id);
+
+        return res.json({
+          ok: true,
+          txHash: knownHash
+        });
+      }
+
+      throw e;
+    }
+
+    console.log("Withdraw tx sent:", tx.hash);
+
+    const receipt = await waitForConfirmedTx(tx.hash, 60000, 3000);
+
+    if (!receipt) {
+      console.error("Withdraw not confirmed in time:", tx.hash);
+      return res.status(500).json({
+        error: "withdraw transaction was sent but not confirmed in time",
+        txHash: tx.hash
+      });
+    }
+
+    console.log("Withdraw receipt status:", receipt.status);
+    console.log("Withdraw confirmed in block:", receipt.blockNumber);
+
+    if (receipt.status !== 1) {
+      return res.status(500).json({
+        error: "withdraw transaction failed on-chain",
+        txHash: tx.hash
+      });
+    }
 
     bal.FA_available = round8(bal.FA_available - amountNum);
-
     broadcastUserBalance(user.id);
 
-    res.json({
+    return res.json({
       ok: true,
       txHash: tx.hash
     });
   } catch (e) {
     console.error("withdraw failed:", e);
-    res.status(500).json({ error: "withdraw failed" });
+    return res.status(500).json({
+      error: e.message || "withdraw failed"
+    });
   }
 });
 
 /* =========================
-   VAULT DEPOSITS
+   NATIVE DEPOSITS
 ========================= */
 
-async function watchVaultDeposits() {
-  console.log("Watching Vault Deposited events...");
+async function watchNativeDeposits() {
+  console.log("Watching native deposits...");
 
-  vault.on("Deposited", (userHash, from, amount) => {
-    for (const userId in usersById) {
-      const hash = ethers.keccak256(ethers.toUtf8Bytes(userId));
+  provider.on("block", async (blockNumber) => {
+    try {
+      const block = await provider.getBlock(blockNumber, true);
 
-      if (hash.toLowerCase() === String(userHash).toLowerCase()) {
-        const bal = ensureUserLedger(userId);
-        bal.FA_available = round8(
-          bal.FA_available + Number(ethers.formatUnits(amount, 18))
-        );
+      for (const tx of block.transactions) {
+        if (!tx.to) continue;
 
-        console.log("vault deposit credited to", userId);
-        broadcastUserBalance(userId);
+        const to = tx.to.toLowerCase();
+
+        if (depositAddressToUserId[to]) {
+          if (creditedTransfers.has(tx.hash)) continue;
+
+          const userId = depositAddressToUserId[to];
+          const amount = Number(ethers.formatEther(tx.value));
+
+          if (amount <= 0) continue;
+
+          const bal = ensureUserLedger(userId);
+          bal.FA_available = round8(bal.FA_available + amount);
+
+          creditedTransfers.add(tx.hash);
+
+          console.log("Deposit:", userId, amount);
+
+          broadcastUserBalance(userId);
+        }
       }
+    } catch (e) {
+      console.log("block scan error:", e.message);
     }
   });
 }
@@ -1033,20 +1146,44 @@ app.get("/api/health", (_req, res) => {
 });
 
 /* =========================
+   DEPOSIT WATCHER INSTANCE
+========================= */
+
+const depositWatcher = createDepositWatcher({
+  provider,
+  hotWallet,
+  tokenAddress: null,
+  vaultAddress: null,
+  usersById,
+  depositAddressToUserId,
+  ledger,
+  creditedTransfers,
+  sweptTransfers,
+  GAS_TOPUP_ETH,
+  MIN_GAS_ETH,
+  masterNode
+});
+
+/* =========================
    START
 ========================= */
 
 async function start() {
-  const net = await provider.getNetwork();
+  console.log("Connecting to RPC:", process.env.RPC_URL);
 
-  console.log("Network:", net.chainId);
-  console.log("Hot wallet:", hotWallet.address);
-  console.log("Token:", tokenAddress);
-  console.log("Vault:", vaultAddress);
+  let net;
+  try {
+    net = await provider.getNetwork();
+    console.log("Network:", net.chainId);
+  } catch (e) {
+    console.error("RPC connection failed:", e.message);
+    throw e;
+  }
+
+  console.log("Hot wallet:", await hotWallet.getAddress());
 
   seedMarket();
 
-  await watchVaultDeposits();
   depositWatcher.start();
 
   startMarketMaker({
@@ -1058,7 +1195,6 @@ async function start() {
     console.log("Server running http://localhost:" + PORT);
   });
 }
-
 start().catch((e) => {
   console.error("Fatal start error:", e);
   process.exit(1);
