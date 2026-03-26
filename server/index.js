@@ -59,24 +59,7 @@ app.use(
    LOAD ENV
 ========================= */
 
-const envPath = path.join(__dirname, "env");
-
-if (!fs.existsSync(envPath)) {
-  throw new Error("env file not found");
-}
-
-const envRaw = fs.readFileSync(envPath, "utf8");
-
-for (const line of envRaw.split("\n")) {
-  const trimmed = line.trim();
-  if (!trimmed || !trimmed.includes("=")) continue;
-
-  const parts = trimmed.split("=");
-  const key = parts[0].trim();
-  const value = parts.slice(1).join("=").trim();
-
-  process.env[key] = value;
-}
+require("dotenv").config();
 
 const PORT = Number(process.env.PORT || 3000);
 const GAS_TOPUP_ETH = process.env.GAS_TOPUP_ETH || "0.0005";
